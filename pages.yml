@@ -1,27 +1,53 @@
-# 我的第一篇博客：开源软件开发学习心得
+name: Deploy MkDocs to GitHub Pages
 
-## 前言
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
-这是我的第一篇博客文章，记录了我在开源软件开发课程中的学习收获。
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
-## 为什么选择 MkDocs
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
-在众多静态网站生成工具中，我选择了 MkDocs，原因如下：
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-1. **简单易用**：配置文件简洁，上手快
-2. **Markdown 原生支持**：专注内容写作
-3. **GitHub Pages 友好**：可以通过 GitHub Actions 轻松部署
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
 
-## GitHub Actions 自动部署
+      - name: Install MkDocs
+        run: pip install mkdocs
 
-通过配置 GitHub Actions 工作流，每次提交代码后，网站会自动构建并发布到 GitHub Pages，无需手动操作。
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
 
-## 总结
+      - name: Build with MkDocs
+        run: mkdocs build
 
-通过这次实践，我掌握了：
-- GitHub 仓库的基本使用
-- Markdown 写作规范
-- GitHub Actions 自动化部署
-- GitHub Pages 网站发布
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./site
 
-后续会继续更新更多学习笔记。
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
