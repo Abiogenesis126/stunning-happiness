@@ -1,0 +1,7 @@
+site_name: 我的个人博客
+site_author: 徐李燃
+nav:
+  - 首页: index.md
+  - 博客文章:
+    - 第一篇博客: posts/first-blog.md
+theme: readthedocs
